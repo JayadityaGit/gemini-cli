@@ -111,6 +111,7 @@ describe('extensionsCommand', () => {
       },
       ui: {
         dispatchExtensionStateUpdate: mockDispatchExtensionState,
+        addConfirmUpdateExtensionRequest: vi.fn(),
       },
     });
   });
@@ -131,6 +132,53 @@ describe('extensionsCommand', () => {
           type: MessageType.EXTENSIONS_LIST,
           extensions: expect.any(Array),
         },
+        expect.any(Number),
+      );
+    });
+
+    it('should show explore dialog when no extensions are installed', async () => {
+      mockGetExtensions.mockReturnValue([]);
+      const command = extensionsCommand();
+      if (!command.action) throw new Error('Action not defined');
+      await command.action(mockContext, '');
+
+      expect(
+        mockContext.ui.addConfirmUpdateExtensionRequest,
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          prompt:
+            'No extensions installed. Would you love to explore extensions?',
+          onConfirm: expect.any(Function),
+        }),
+      );
+
+      // Verify that extensions list is not shown
+      expect(mockContext.ui.addItem).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: MessageType.EXTENSIONS_LIST,
+        }),
+        expect.any(Number),
+      );
+    });
+
+    it('should call explore action when user confirms dialog', async () => {
+      mockGetExtensions.mockReturnValue([]);
+      vi.stubEnv('NODE_ENV', 'test');
+      const command = extensionsCommand();
+      if (!command.action) throw new Error('Action not defined');
+      await command.action(mockContext, '');
+
+      const confirmCall = vi.mocked(
+        mockContext.ui.addConfirmUpdateExtensionRequest,
+      ).mock.calls[0][0];
+      confirmCall.onConfirm(true);
+
+      // Verify explore action was triggered
+      expect(mockContext.ui.addItem).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: MessageType.INFO,
+          text: expect.stringContaining('extensions page'),
+        }),
         expect.any(Number),
       );
     });
@@ -360,6 +408,24 @@ describe('extensionsCommand', () => {
         },
         expect.any(Number),
       );
+    });
+
+    it('should show explore dialog when no extensions are installed', async () => {
+      mockGetExtensions.mockReturnValue([]);
+      await updateAction(mockContext, '--all');
+
+      expect(
+        mockContext.ui.addConfirmUpdateExtensionRequest,
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          prompt:
+            'No extensions installed. Would you love to explore extensions?',
+          onConfirm: expect.any(Function),
+        }),
+      );
+
+      // Verify that update dispatch is not called
+      expect(mockDispatchExtensionState).not.toHaveBeenCalled();
     });
   });
 
@@ -756,6 +822,43 @@ describe('extensionsCommand', () => {
 
       const suggestions = completeExtensions(mockContext, 'ext');
       expect(suggestions).toEqual(['ext1']);
+    });
+
+    it('should show explore dialog when --all is used and no extensions are installed', async () => {
+      mockGetExtensions.mockReturnValue([]);
+      await restartAction!(mockContext, '--all');
+
+      expect(
+        mockContext.ui.addConfirmUpdateExtensionRequest,
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          prompt:
+            'No extensions installed. Would you love to explore extensions?',
+          onConfirm: expect.any(Function),
+        }),
+      );
+
+      // Verify that restart logic is not called
+      expect(mockRestartExtension).not.toHaveBeenCalled();
+    });
+
+    it('should NOT show explore dialog when specific extension name is used with no extensions', async () => {
+      mockGetExtensions.mockReturnValue([]);
+      await restartAction!(mockContext, 'some-extension');
+
+      // Dialog should not be shown
+      expect(
+        mockContext.ui.addConfirmUpdateExtensionRequest,
+      ).not.toHaveBeenCalled();
+
+      // Normal warning should be shown
+      expect(mockContext.ui.addItem).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: MessageType.WARNING,
+          text: expect.stringContaining('not found or not active'),
+        }),
+        expect.any(Number),
+      );
     });
   });
 });

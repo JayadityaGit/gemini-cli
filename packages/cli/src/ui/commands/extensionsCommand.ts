@@ -25,6 +25,11 @@ import { SettingScope } from '../../config/settings.js';
 import { theme } from '../semantic-colors.js';
 
 async function listAction(context: CommandContext) {
+  // Check if no extensions are installed and prompt to explore
+  if (checkAndPromptForExtensions(context)) {
+    return;
+  }
+
   const historyItem: HistoryItemExtensionsList = {
     type: MessageType.EXTENSIONS_LIST,
     extensions: context.services.config
@@ -33,6 +38,28 @@ async function listAction(context: CommandContext) {
   };
 
   context.ui.addItem(historyItem, Date.now());
+}
+
+/**
+ * Checks if no extensions are installed and prompts the user to explore extensions.
+ * @returns true if the dialog was shown (no extensions installed), false otherwise
+ */
+function checkAndPromptForExtensions(context: CommandContext): boolean {
+  const extensions = context.services.config?.getExtensions() ?? [];
+
+  if (extensions.length === 0) {
+    context.ui.addConfirmUpdateExtensionRequest({
+      prompt: 'No extensions installed. Would you love to explore extensions?',
+      onConfirm: (confirmed: boolean) => {
+        if (confirmed) {
+          exploreAction(context);
+        }
+      },
+    });
+    return true;
+  }
+
+  return false;
 }
 
 function updateAction(context: CommandContext, args: string): Promise<void> {
@@ -48,6 +75,11 @@ function updateAction(context: CommandContext, args: string): Promise<void> {
       },
       Date.now(),
     );
+    return Promise.resolve();
+  }
+
+  // Check if no extensions are installed and prompt to explore
+  if (checkAndPromptForExtensions(context)) {
     return Promise.resolve();
   }
 
@@ -150,6 +182,11 @@ async function restartAction(
       Date.now(),
     );
     return Promise.resolve();
+  }
+
+  // Check if --all is used and no extensions are installed, show dialog
+  if (all && checkAndPromptForExtensions(context)) {
+    return;
   }
 
   let extensionsToRestart = extensionLoader
