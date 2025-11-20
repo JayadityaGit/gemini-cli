@@ -78,8 +78,8 @@ function updateAction(context: CommandContext, args: string): Promise<void> {
     return Promise.resolve();
   }
 
-  // Check if no extensions are installed and prompt to explore
-  if (checkAndPromptForExtensions(context)) {
+  // Check if --all is used and no extensions are installed, show dialog
+  if (all && checkAndPromptForExtensions(context)) {
     return Promise.resolve();
   }
 
