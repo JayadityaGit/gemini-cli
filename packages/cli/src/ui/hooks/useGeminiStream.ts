@@ -1439,6 +1439,10 @@ export const useGeminiStream = (
 
   const handleApprovalModeChange = useCallback(
     async (newApprovalMode: ApprovalMode) => {
+      if (geminiClient) {
+        geminiClient.updateSystemInstruction();
+      }
+
       if (
         previousApprovalModeRef.current === ApprovalMode.PLAN &&
         newApprovalMode !== ApprovalMode.PLAN &&

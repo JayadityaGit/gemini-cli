@@ -116,12 +116,30 @@ export abstract class BaseToolInvocation<
       );
     }
 
-    if (decision === 'ASK_USER') {
-      return this.getConfirmationDetails(abortSignal);
+    const details = await (decision === 'ASK_USER'
+      ? this.getConfirmationDetails(abortSignal)
+      : this.getConfirmationDetails(abortSignal));
+
+    if (details) {
+      if (!details.toolName && this._toolName) {
+        details.toolName = this._toolName;
+      }
+
+      if (this.params && typeof this.params === 'object') {
+        const p = this.params as Record<string, unknown>;
+        if (typeof p['thought_what'] === 'string') {
+          details.thought_what = p['thought_what'];
+        }
+        if (typeof p['thought_why'] === 'string') {
+          details.thought_why = p['thought_why'];
+        }
+        if (typeof p['thought_how'] === 'string') {
+          details.thought_how = p['thought_how'];
+        }
+      }
     }
 
-    // Default to confirmation details if decision is unknown (should not happen with exhaustive policy)
-    return this.getConfirmationDetails(abortSignal);
+    return details;
   }
 
   /**
@@ -721,6 +739,7 @@ export interface DiffStat {
 export interface ToolEditConfirmationDetails {
   type: 'edit';
   title: string;
+  toolName?: string;
   onConfirm: (
     outcome: ToolConfirmationOutcome,
     payload?: ToolConfirmationPayload,
@@ -732,6 +751,9 @@ export interface ToolEditConfirmationDetails {
   newContent: string;
   isModifying?: boolean;
   ideConfirmation?: Promise<DiffUpdateResult>;
+  thought_what?: string;
+  thought_why?: string;
+  thought_how?: string;
 }
 
 export interface ToolEditConfirmationPayload {
@@ -751,59 +773,102 @@ export interface ToolExitPlanModeConfirmationPayload {
   feedback?: string;
 }
 
+export interface ToolPresentPlanConfirmationPayload {
+  /** Whether the user approved the plan */
+  approved: boolean;
+  /** If rejected, the user's feedback */
+  feedback?: string;
+}
+
 export type ToolConfirmationPayload =
   | ToolEditConfirmationPayload
   | ToolAskUserConfirmationPayload
-  | ToolExitPlanModeConfirmationPayload;
+  | ToolExitPlanModeConfirmationPayload
+  | ToolPresentPlanConfirmationPayload;
 
 export interface ToolExecuteConfirmationDetails {
   type: 'exec';
   title: string;
+  toolName?: string;
   onConfirm: (outcome: ToolConfirmationOutcome) => Promise<void>;
   command: string;
   rootCommand: string;
   rootCommands: string[];
   commands?: string[];
+  thought_what?: string;
+  thought_why?: string;
+  thought_how?: string;
 }
 
 export interface ToolMcpConfirmationDetails {
   type: 'mcp';
   title: string;
+  toolName?: string;
   serverName: string;
-  toolName: string;
   toolDisplayName: string;
   toolArgs?: Record<string, unknown>;
   toolDescription?: string;
   toolParameterSchema?: unknown;
   onConfirm: (outcome: ToolConfirmationOutcome) => Promise<void>;
+  thought_what?: string;
+  thought_why?: string;
+  thought_how?: string;
 }
 
 export interface ToolInfoConfirmationDetails {
   type: 'info';
   title: string;
+  toolName?: string;
   onConfirm: (outcome: ToolConfirmationOutcome) => Promise<void>;
   prompt: string;
   urls?: string[];
+  thought_what?: string;
+  thought_why?: string;
+  thought_how?: string;
 }
 
 export interface ToolAskUserConfirmationDetails {
   type: 'ask_user';
   title: string;
+  toolName?: string;
   questions: Question[];
   onConfirm: (
     outcome: ToolConfirmationOutcome,
     payload?: ToolConfirmationPayload,
   ) => Promise<void>;
+  thought_what?: string;
+  thought_why?: string;
+  thought_how?: string;
 }
 
 export interface ToolExitPlanModeConfirmationDetails {
   type: 'exit_plan_mode';
   title: string;
+  toolName?: string;
   planPath: string;
   onConfirm: (
     outcome: ToolConfirmationOutcome,
     payload?: ToolConfirmationPayload,
   ) => Promise<void>;
+  thought_what?: string;
+  thought_why?: string;
+  thought_how?: string;
+}
+
+export interface ToolPresentPlanConfirmationDetails {
+  type: 'present_plan';
+  title: string;
+  toolName?: string;
+  what: string;
+  why: string;
+  how: string;
+  onConfirm: (
+    outcome: ToolConfirmationOutcome,
+    payload?: ToolConfirmationPayload,
+  ) => Promise<void>;
+  thought_what?: string;
+  thought_why?: string;
+  thought_how?: string;
 }
 
 export type ToolCallConfirmationDetails =
@@ -812,7 +877,8 @@ export type ToolCallConfirmationDetails =
   | ToolMcpConfirmationDetails
   | ToolInfoConfirmationDetails
   | ToolAskUserConfirmationDetails
-  | ToolExitPlanModeConfirmationDetails;
+  | ToolExitPlanModeConfirmationDetails
+  | ToolPresentPlanConfirmationDetails;
 
 export enum ToolConfirmationOutcome {
   ProceedOnce = 'proceed_once',

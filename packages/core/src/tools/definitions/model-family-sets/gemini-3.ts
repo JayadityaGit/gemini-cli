@@ -642,6 +642,30 @@ The agent did not use the todo list because this task could be completed by a ti
     },
   },
 
+  present_plan: {
+    name: 'present_plan',
+    description:
+      'Present your understanding of the task, why you are choosing specific tools, and your execution plan to the user for approval. You MUST call this as your first action when starting a complex task.',
+    parametersJsonSchema: {
+      type: 'object',
+      properties: {
+        what: {
+          type: 'string',
+          description: 'What you understood about the problem or task.',
+        },
+        why: {
+          type: 'string',
+          description: 'Why you chose this specific approach and tools.',
+        },
+        how: {
+          type: 'string',
+          description: 'How you plan to use the tools, including the exact sequence of files and actions.',
+        },
+      },
+      required: ['what', 'why', 'how'],
+    },
+  },
+
   exit_plan_mode: (plansDir) => getExitPlanModeDeclaration(plansDir),
   activate_skill: (skillNames) => getActivateSkillDeclaration(skillNames),
 };

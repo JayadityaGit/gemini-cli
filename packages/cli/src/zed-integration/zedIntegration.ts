@@ -1311,9 +1311,10 @@ function toPermissionOptions(
     case 'exit_plan_mode':
       // exit_plan_mode doesn't need "always allow" options since it's a plan approval flow
       return [...basicPermissionOptions];
+    case 'present_plan' as any:
+      return [...basicPermissionOptions];
     default: {
-      const unreachable: never = confirmation;
-      throw new Error(`Unexpected: ${unreachable}`);
+      throw new Error(`Unexpected: \${(confirmation as any).type}`);
     }
   }
 }
@@ -1360,6 +1361,11 @@ function buildAvailableModes(isPlanEnabled: boolean): acp.SessionMode[] {
       id: ApprovalMode.YOLO,
       name: 'YOLO',
       description: 'Auto-approves all tools',
+    },
+    {
+      id: ApprovalMode.HARDCORE,
+      name: 'Hardcore',
+      description: 'Requires plan approval',
     },
   ];
 

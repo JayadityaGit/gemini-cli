@@ -33,6 +33,7 @@ import {
   GET_INTERNAL_DOCS_DEFINITION,
   ASK_USER_DEFINITION,
   ENTER_PLAN_MODE_DEFINITION,
+  PRESENT_PLAN_DEFINITION,
   getExitPlanModeDefinition,
   getActivateSkillDefinition,
 } from './coreTools.js';
@@ -80,6 +81,7 @@ describe('coreTools snapshots for specific models', () => {
     { name: 'get_internal_docs', definition: GET_INTERNAL_DOCS_DEFINITION },
     { name: 'ask_user', definition: ASK_USER_DEFINITION },
     { name: 'enter_plan_mode', definition: ENTER_PLAN_MODE_DEFINITION },
+    { name: 'present_plan', definition: PRESENT_PLAN_DEFINITION },
     {
       name: 'exit_plan_mode',
       definition: getExitPlanModeDefinition('/mock/plans'),

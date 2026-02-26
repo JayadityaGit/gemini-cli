@@ -371,6 +371,12 @@ export class PolicyEngine {
     serverName: string | undefined,
     toolAnnotations?: Record<string, unknown>,
   ): Promise<CheckResult> {
+    if (this.approvalMode === ApprovalMode.HARDCORE) {
+      return {
+        decision: this.applyNonInteractiveMode(PolicyDecision.ASK_USER),
+      };
+    }
+
     let stringifiedArgs: string | undefined;
     // Compute stringified args once before the loop
     if (

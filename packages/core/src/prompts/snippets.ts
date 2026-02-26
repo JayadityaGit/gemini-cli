@@ -50,6 +50,7 @@ export interface CoreMandatesOptions {
 
 export interface PrimaryWorkflowsOptions {
   interactive: boolean;
+  isHardcoreMode?: boolean;
   enableCodebaseInvestigator: boolean;
   enableWriteTodosTool: boolean;
   enableEnterPlanModeTool: boolean;
@@ -565,10 +566,18 @@ function workflowStepStrategy(options: PrimaryWorkflowsOptions): string {
   if (options.enableWriteTodosTool) {
     return `2. **Strategy:** Formulate a grounded plan based on your research.${
       options.interactive ? ' Share a concise summary of your strategy.' : ''
-    } For complex tasks, break them down into smaller, manageable subtasks and use the ${formatToolName(WRITE_TODOS_TOOL_NAME)} tool to track your progress.`;
+    }${
+      options.isHardcoreMode
+        ? ' **CRITICAL: HARDCORE MODE IS ACTIVE.** You are in a high-transparency mode. For EVERY SINGLE tool call you make (including `grep_search`, `read_file`, `list_directory`, etc.), you MUST provide three additional mandatory parameters: `thought_what` (exact sub-task you are solving), `thought_why` (why this tool is the best choice right now), and `thought_how` (exactly how you will use it, including files/offsets). These parameters are REQUIRED by the tool schemas. If you omit them, the tool call will fail.'
+        : ''
+    } Break them down into smaller, manageable subtasks and use the ${formatToolName(WRITE_TODOS_TOOL_NAME)} tool to track your progress.`;
   }
   return `2. **Strategy:** Formulate a grounded plan based on your research.${
     options.interactive ? ' Share a concise summary of your strategy.' : ''
+  }${
+    options.isHardcoreMode
+      ? ' **CRITICAL: HARDCORE MODE IS ACTIVE.** You are in a high-transparency mode. For EVERY SINGLE tool call you make (including `grep_search`, `read_file`, `list_directory`, etc.), you MUST provide three additional mandatory parameters: `thought_what` (exact sub-task you are solving), `thought_why` (why this tool is the best choice right now), and `thought_how` (exactly how you will use it, including files/offsets). These parameters are REQUIRED by the tool schemas. If you omit them, the tool call will fail.'
+      : ''
   }`;
 }
 

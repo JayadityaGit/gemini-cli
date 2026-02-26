@@ -39,6 +39,7 @@ import {
 } from '../../textConstants.js';
 import { AskUserDialog } from '../AskUserDialog.js';
 import { ExitPlanModeDialog } from '../ExitPlanModeDialog.js';
+import { TaskPlanDialog } from '../TaskPlanDialog.js';
 import { WarningMessage } from './WarningMessage.js';
 import {
   getDeceptiveUrlDetails,
@@ -86,7 +87,13 @@ export const ToolConfirmationMessage: React.FC<
 
   const handlesOwnUI =
     confirmationDetails.type === 'ask_user' ||
-    confirmationDetails.type === 'exit_plan_mode';
+    confirmationDetails.type === 'exit_plan_mode' ||
+    (confirmationDetails.type as string) === 'present_plan' ||
+    Boolean(
+      (confirmationDetails as any).thought_what ||
+        (confirmationDetails as any).thought_why ||
+        (confirmationDetails as any).thought_how,
+    );
   const isTrustedFolder = config.isTrustedFolder();
 
   const handleConfirm = useCallback(
@@ -450,6 +457,50 @@ export const ToolConfirmationMessage: React.FC<
       return { question: '', bodyContent, options: [], securityWarnings: null };
     }
 
+    const details = confirmationDetails as any;
+    if (details.thought_what || details.thought_why || details.thought_how) {
+      bodyContent = (
+        <TaskPlanDialog
+          header={`Justification for ${details.title || 'Tool Call'}:`}
+          toolName={details.toolName}
+          what={details.thought_what || '(No explanation provided)'}
+          why={details.thought_why || '(No explanation provided)'}
+          how={details.thought_how || '(No explanation provided)'}
+          onApprove={() => {
+            handleConfirm(ToolConfirmationOutcome.ProceedOnce, {
+              approved: true,
+            });
+          }}
+          onCancel={() => {
+            handleConfirm(ToolConfirmationOutcome.Cancel);
+          }}
+          width={terminalWidth}
+        />
+      );
+      return { question: '', bodyContent, options: [], securityWarnings: null };
+    }
+
+    if (details.type === 'present_plan') {
+      bodyContent = (
+        <TaskPlanDialog
+          toolName={details.toolName}
+          what={details.what}
+          why={details.why}
+          how={details.how}
+          onApprove={() => {
+            handleConfirm(ToolConfirmationOutcome.ProceedOnce, {
+              approved: true,
+            });
+          }}
+          onCancel={() => {
+            handleConfirm(ToolConfirmationOutcome.Cancel);
+          }}
+          width={terminalWidth}
+        />
+      );
+      return { question: '', bodyContent, options: [], securityWarnings: null };
+    }
+
     if (confirmationDetails.type === 'edit') {
       if (!confirmationDetails.isModifying) {
         question = `Apply this change?`;
@@ -467,7 +518,9 @@ export const ToolConfirmationMessage: React.FC<
     } else if (confirmationDetails.type === 'mcp') {
       // mcp tool confirmation
       const mcpProps = confirmationDetails;
-      question = `Allow execution of MCP tool "${sanitizeForDisplay(mcpProps.toolName)}" from server "${sanitizeForDisplay(mcpProps.serverName)}"?`;
+      question = `Allow execution of MCP tool "${sanitizeForDisplay(
+        mcpProps.toolName || '',
+      )}" from server "${sanitizeForDisplay(mcpProps.serverName)}"?`;
     }
 
     if (confirmationDetails.type === 'edit') {
@@ -597,7 +650,7 @@ export const ToolConfirmationMessage: React.FC<
               MCP Server: {sanitizeForDisplay(mcpProps.serverName)}
             </Text>
             <Text color={theme.text.link}>
-              Tool: {sanitizeForDisplay(mcpProps.toolName)}
+              Tool: {sanitizeForDisplay(mcpProps.toolName || '')}
             </Text>
           </>
           {hasMcpToolDetails && (

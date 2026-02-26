@@ -18,7 +18,9 @@ export const APPROVAL_MODE_TEXT = {
   AUTO_EDIT: 'auto-accept edits',
   PLAN: 'plan',
   YOLO: 'YOLO',
+  HARDCORE: 'hardcore',
   HINT_SWITCH_TO_PLAN_MODE: 'shift+tab to plan',
+  HINT_SWITCH_TO_HARDCORE_MODE: 'shift+tab to hardcore',
   HINT_SWITCH_TO_MANUAL_MODE: 'shift+tab to manual',
   HINT_SWITCH_TO_AUTO_EDIT_MODE: 'shift+tab to accept edits',
   HINT_SWITCH_TO_YOLO_MODE: 'ctrl+y',
@@ -38,11 +40,16 @@ export const ApprovalModeIndicator: React.FC<ApprovalModeIndicatorProps> = ({
       textContent = APPROVAL_MODE_TEXT.AUTO_EDIT;
       subText = allowPlanMode
         ? APPROVAL_MODE_TEXT.HINT_SWITCH_TO_PLAN_MODE
-        : APPROVAL_MODE_TEXT.HINT_SWITCH_TO_MANUAL_MODE;
+        : APPROVAL_MODE_TEXT.HINT_SWITCH_TO_HARDCORE_MODE;
       break;
     case ApprovalMode.PLAN:
       textColor = theme.status.success;
       textContent = APPROVAL_MODE_TEXT.PLAN;
+      subText = APPROVAL_MODE_TEXT.HINT_SWITCH_TO_HARDCORE_MODE;
+      break;
+    case ApprovalMode.HARDCORE:
+      textColor = theme.status.error; // or maybe theme.text.accent? Let's use error/warning to show it's intense, or maybe just accent
+      textContent = APPROVAL_MODE_TEXT.HARDCORE;
       subText = APPROVAL_MODE_TEXT.HINT_SWITCH_TO_MANUAL_MODE;
       break;
     case ApprovalMode.YOLO:

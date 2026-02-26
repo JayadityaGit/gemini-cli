@@ -535,22 +535,9 @@ export class ToolRegistry {
    * @returns An array of FunctionDeclarations.
    */
   getFunctionDeclarations(modelId?: string): FunctionDeclaration[] {
-    const isPlanMode = this.config.getApprovalMode() === ApprovalMode.PLAN;
-    const plansDir = this.config.storage.getPlansDir();
-
     const declarations: FunctionDeclaration[] = [];
     this.getActiveTools().forEach((tool) => {
-      let schema = tool.getSchema(modelId);
-      if (
-        isPlanMode &&
-        (tool.name === WRITE_FILE_TOOL_NAME || tool.name === EDIT_TOOL_NAME)
-      ) {
-        schema = {
-          ...schema,
-          description: `ONLY FOR PLANS: ${schema.description}. You are currently in Plan Mode and may ONLY use this tool to write or update plans (.md files) in the plans directory: ${plansDir}/. You cannot use this tool to modify source code directly.`,
-        };
-      }
-      declarations.push(schema);
+      declarations.push(this.getToolSchemaWithInjections(tool, modelId));
     });
     return declarations;
   }
@@ -569,10 +556,74 @@ export class ToolRegistry {
     for (const name of toolNames) {
       const tool = this.getTool(name);
       if (tool) {
-        declarations.push(tool.getSchema(modelId));
+        declarations.push(this.getToolSchemaWithInjections(tool, modelId));
       }
     }
     return declarations;
+  }
+
+  private getToolSchemaWithInjections(
+    tool: AnyDeclarativeTool,
+    modelId?: string,
+  ): FunctionDeclaration {
+    const approvalMode = this.config.getApprovalMode();
+    const isPlanMode = approvalMode === ApprovalMode.PLAN;
+    const isHardcoreMode = approvalMode === ApprovalMode.HARDCORE;
+    const plansDir = this.config.storage.getPlansDir();
+
+    let schema = tool.getSchema(modelId);
+
+    if (
+      isPlanMode &&
+      (tool.name === WRITE_FILE_TOOL_NAME || tool.name === EDIT_TOOL_NAME)
+    ) {
+      schema = {
+        ...schema,
+        description: `ONLY FOR PLANS: ${schema.description}. You are currently in Plan Mode and may ONLY use this tool to write or update plans (.md files) in the plans directory: ${plansDir}/. You cannot use this tool to modify source code directly.`,
+      };
+    }
+
+    if (isHardcoreMode) {
+      const parametersJsonSchema = schema.parametersJsonSchema
+        ? JSON.parse(JSON.stringify(schema.parametersJsonSchema))
+        : { type: 'object', properties: {}, required: [] };
+
+      if (parametersJsonSchema.type === 'object') {
+        parametersJsonSchema.properties = parametersJsonSchema.properties || {};
+        parametersJsonSchema.required = parametersJsonSchema.required || [];
+
+        parametersJsonSchema.properties['thought_what'] = {
+          type: 'string',
+          description: 'What you understood about the problem or task.',
+        };
+        parametersJsonSchema.properties['thought_why'] = {
+          type: 'string',
+          description: 'Why you chose this specific approach and tools.',
+        };
+        parametersJsonSchema.properties['thought_how'] = {
+          type: 'string',
+          description:
+            'How you plan to use the tools, including the exact sequence of files and actions.',
+        };
+
+        if (!parametersJsonSchema.required.includes('thought_what')) {
+          parametersJsonSchema.required.push('thought_what');
+        }
+        if (!parametersJsonSchema.required.includes('thought_why')) {
+          parametersJsonSchema.required.push('thought_why');
+        }
+        if (!parametersJsonSchema.required.includes('thought_how')) {
+          parametersJsonSchema.required.push('thought_how');
+        }
+
+        schema = {
+          ...schema,
+          parametersJsonSchema,
+        };
+      }
+    }
+
+    return schema;
   }
 
   /**

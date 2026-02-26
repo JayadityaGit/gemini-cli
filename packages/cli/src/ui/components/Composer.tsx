@@ -126,6 +126,9 @@ export const Composer = ({ isFocused = true }: { isFocused?: boolean }) => {
     case ApprovalMode.AUTO_EDIT:
       modeBleedThrough = { text: 'auto edit', color: theme.status.warning };
       break;
+    case ApprovalMode.HARDCORE:
+      modeBleedThrough = { text: 'hardcore', color: theme.status.error };
+      break;
     case ApprovalMode.DEFAULT:
       modeBleedThrough = null;
       break;

@@ -408,6 +408,35 @@ exports[`coreTools snapshots for specific models > Model: gemini-2.5-pro > snaps
 }
 `;
 
+exports[`coreTools snapshots for specific models > Model: gemini-2.5-pro > snapshot for tool: present_plan 1`] = `
+{
+  "description": "Present your understanding of the task, why you are choosing specific tools, and your execution plan to the user for approval. You MUST call this as your first action when starting a complex task.",
+  "name": "present_plan",
+  "parametersJsonSchema": {
+    "properties": {
+      "how": {
+        "description": "How you plan to use the tools, including the exact sequence of files and actions.",
+        "type": "string",
+      },
+      "what": {
+        "description": "What you understood about the problem or task.",
+        "type": "string",
+      },
+      "why": {
+        "description": "Why you chose this specific approach and tools.",
+        "type": "string",
+      },
+    },
+    "required": [
+      "what",
+      "why",
+      "how",
+    ],
+    "type": "object",
+  },
+}
+`;
+
 exports[`coreTools snapshots for specific models > Model: gemini-2.5-pro > snapshot for tool: read_file 1`] = `
 {
   "description": "Reads and returns the content of a specified file. If the file is large, the content will be truncated. The tool's response will clearly indicate if truncation has occurred and will provide details on how to read more of the file using the 'start_line' and 'end_line' parameters. Handles text, images (PNG, JPG, GIF, WEBP, SVG, BMP), audio files (MP3, WAV, AIFF, AAC, OGG, FLAC), and PDF files. For text files, it can read specific line ranges.",
@@ -1189,6 +1218,35 @@ exports[`coreTools snapshots for specific models > Model: gemini-3-pro-preview >
     },
     "required": [
       "dir_path",
+    ],
+    "type": "object",
+  },
+}
+`;
+
+exports[`coreTools snapshots for specific models > Model: gemini-3-pro-preview > snapshot for tool: present_plan 1`] = `
+{
+  "description": "Present your understanding of the task, why you are choosing specific tools, and your execution plan to the user for approval. You MUST call this as your first action when starting a complex task.",
+  "name": "present_plan",
+  "parametersJsonSchema": {
+    "properties": {
+      "how": {
+        "description": "How you plan to use the tools, including the exact sequence of files and actions.",
+        "type": "string",
+      },
+      "what": {
+        "description": "What you understood about the problem or task.",
+        "type": "string",
+      },
+      "why": {
+        "description": "Why you chose this specific approach and tools.",
+        "type": "string",
+      },
+    },
+    "required": [
+      "what",
+      "why",
+      "how",
     ],
     "type": "object",
   },

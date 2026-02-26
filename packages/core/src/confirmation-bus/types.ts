@@ -72,46 +72,80 @@ export type SerializableConfirmationDetails =
   | {
       type: 'info';
       title: string;
+      toolName?: string;
       prompt: string;
       urls?: string[];
+      thought_what?: string;
+      thought_why?: string;
+      thought_how?: string;
     }
   | {
       type: 'edit';
       title: string;
+      toolName?: string;
       fileName: string;
       filePath: string;
       fileDiff: string;
       originalContent: string | null;
       newContent: string;
       isModifying?: boolean;
+      thought_what?: string;
+      thought_why?: string;
+      thought_how?: string;
     }
   | {
       type: 'exec';
       title: string;
+      toolName?: string;
       command: string;
       rootCommand: string;
       rootCommands: string[];
       commands?: string[];
+      thought_what?: string;
+      thought_why?: string;
+      thought_how?: string;
     }
   | {
       type: 'mcp';
       title: string;
       serverName: string;
-      toolName: string;
+      toolName?: string;
       toolDisplayName: string;
       toolArgs?: Record<string, unknown>;
       toolDescription?: string;
       toolParameterSchema?: unknown;
+      thought_what?: string;
+      thought_why?: string;
+      thought_how?: string;
     }
   | {
       type: 'ask_user';
       title: string;
+      toolName?: string;
       questions: Question[];
+      thought_what?: string;
+      thought_why?: string;
+      thought_how?: string;
     }
   | {
       type: 'exit_plan_mode';
       title: string;
+      toolName?: string;
       planPath: string;
+      thought_what?: string;
+      thought_why?: string;
+      thought_how?: string;
+    }
+  | {
+      type: 'present_plan';
+      title: string;
+      toolName?: string;
+      what: string;
+      why: string;
+      how: string;
+      thought_what?: string;
+      thought_why?: string;
+      thought_how?: string;
     };
 
 export interface UpdatePolicy {

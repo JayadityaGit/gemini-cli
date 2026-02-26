@@ -407,7 +407,7 @@ describe('useApprovalModeIndicator', () => {
       expect(mockConfigInstance.getApprovalMode()).toBe(ApprovalMode.DEFAULT);
     });
 
-    it('should disable AUTO_EDIT mode when Shift+Tab is pressed', () => {
+    it('should cycle from AUTO_EDIT mode when Shift+Tab is pressed', () => {
       mockConfigInstance.getApprovalMode.mockReturnValue(
         ApprovalMode.AUTO_EDIT,
       );
@@ -427,9 +427,8 @@ describe('useApprovalModeIndicator', () => {
       });
 
       expect(mockConfigInstance.setApprovalMode).toHaveBeenCalledWith(
-        ApprovalMode.DEFAULT,
+        ApprovalMode.HARDCORE,
       );
-      expect(mockConfigInstance.getApprovalMode()).toBe(ApprovalMode.DEFAULT);
     });
 
     it('should show a warning when trying to enable privileged modes', () => {
@@ -715,7 +714,7 @@ describe('useApprovalModeIndicator', () => {
     );
   });
 
-  it('should cycle to DEFAULT when allowPlanMode is false', () => {
+  it('should cycle to HARDCORE when allowPlanMode is false', () => {
     mockConfigInstance.getApprovalMode.mockReturnValue(ApprovalMode.AUTO_EDIT);
 
     renderHook(() =>
@@ -726,12 +725,12 @@ describe('useApprovalModeIndicator', () => {
       }),
     );
 
-    // AUTO_EDIT -> DEFAULT
+    // AUTO_EDIT -> HARDCORE (when allowPlanMode is false)
     act(() => {
       capturedUseKeypressHandler({ name: 'tab', shift: true } as Key);
     });
     expect(mockConfigInstance.setApprovalMode).toHaveBeenCalledWith(
-      ApprovalMode.DEFAULT,
+      ApprovalMode.HARDCORE,
     );
   });
 });

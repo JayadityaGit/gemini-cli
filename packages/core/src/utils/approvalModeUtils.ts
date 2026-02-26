@@ -20,6 +20,8 @@ export function getApprovalModeDescription(mode: ApprovalMode): string {
       return 'Plan mode (read-only planning)';
     case ApprovalMode.YOLO:
       return 'YOLO mode (all tool calls auto-approved)';
+    case ApprovalMode.HARDCORE:
+      return 'Hardcore mode (planning and confirmation required)';
     default:
       return checkExhaustive(mode);
   }
