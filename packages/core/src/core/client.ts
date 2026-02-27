@@ -33,6 +33,7 @@ import type {
 } from '../services/chatRecordingService.js';
 import type { ContentGenerator } from './contentGenerator.js';
 import { LoopDetectionService } from '../services/loopDetectionService.js';
+import { InsightRecordingService } from '../services/insightRecordingService.js';
 import { ChatCompressionService } from '../services/chatCompressionService.js';
 import { ideContextStore } from '../ide/ideContext.js';
 import {
@@ -96,11 +97,15 @@ export class GeminiClient {
    * being forced and did it fail?
    */
   private hasFailedCompressionAttempt = false;
+  private insightRecordingService: InsightRecordingService;
+  private lastUserPrompt: string = '';
+  private isPromptRecorded: boolean = false;
 
   constructor(private readonly config: Config) {
     this.loopDetector = new LoopDetectionService(config);
     this.compressionService = new ChatCompressionService();
     this.toolOutputMaskingService = new ToolOutputMaskingService();
+    this.insightRecordingService = new InsightRecordingService(config);
     this.lastPromptId = this.config.getSessionId();
 
     coreEvents.on(CoreEvent.ModelChanged, this.handleModelChanged);
@@ -695,6 +700,42 @@ export class GeminiClient {
       }
       yield event;
 
+      if (
+        event.type === GeminiEventType.ToolCallRequest &&
+        typeof this.config.getInsightMode === 'function' &&
+        this.config.getInsightMode()
+      ) {
+        const { name, args } = event.value;
+        const argRecord = args as Record<string, unknown> | undefined;
+        await this.insightRecordingService.initialize(
+          this.lastUserPrompt,
+          this,
+        );
+
+        const usedTokens = this.chat?.getLastPromptTokenCount() ?? 0;
+        const modelForLimit =
+          this.currentSequenceModel || this.config.getModel();
+        const totalTokens = tokenLimit(modelForLimit);
+        const contextUsage = `${usedTokens} / ${totalTokens} tokens (${Math.round((usedTokens / totalTokens) * 100)}%)`;
+
+        this.insightRecordingService.recordToolCall(
+          this.isPromptRecorded ? '' : this.lastUserPrompt,
+          name,
+          !this.isPromptRecorded &&
+            typeof argRecord?.['thought_what'] === 'string'
+            ? argRecord['thought_what']
+            : '',
+          typeof argRecord?.['thought_why'] === 'string'
+            ? argRecord['thought_why']
+            : '',
+          typeof argRecord?.['thought_how'] === 'string'
+            ? argRecord['thought_how']
+            : '',
+          contextUsage,
+        );
+        this.isPromptRecorded = true;
+      }
+
       this.updateTelemetryTokenCount();
 
       if (event.type === GeminiEventType.InvalidStream) {
@@ -796,6 +837,17 @@ export class GeminiClient {
   ): AsyncGenerator<ServerGeminiStreamEvent, Turn> {
     if (!isInvalidStreamRetry) {
       this.config.resetTurn();
+    }
+
+    const requestParts = Array.isArray(request) ? request : [request];
+    const isToolResponse = requestParts.some(
+      (p: any) => p && typeof p === 'object' && 'functionResponse' in p,
+    );
+    if (!isToolResponse) {
+      this.lastUserPrompt = requestParts
+        .map((p: any) => (typeof p === 'string' ? p : p.text || ''))
+        .join('');
+      this.isPromptRecorded = false;
     }
 
     const hooksEnabled = this.config.getEnableHooks();
@@ -1106,7 +1158,10 @@ export class GeminiClient {
    * Masks bulky tool outputs to save context window space.
    */
   private async tryMaskToolOutputs(history: Content[]): Promise<void> {
-    if (!this.config.getToolOutputMaskingEnabled()) {
+    if (
+      typeof this.config.isToolOutputMaskingEnabled !== 'function' ||
+      !this.config.isToolOutputMaskingEnabled()
+    ) {
       return;
     }
     const result = await this.toolOutputMaskingService.mask(

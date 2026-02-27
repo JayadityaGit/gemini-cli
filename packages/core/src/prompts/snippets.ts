@@ -568,7 +568,7 @@ function workflowStepStrategy(options: PrimaryWorkflowsOptions): string {
       options.interactive ? ' Share a concise summary of your strategy.' : ''
     }${
       options.isHardcoreMode
-        ? ' **CRITICAL: HARDCORE MODE IS ACTIVE.** You are in a high-transparency mode. For EVERY SINGLE tool call you make (including `grep_search`, `read_file`, `list_directory`, etc.), you MUST provide three additional mandatory parameters: `thought_what` (exact sub-task you are solving), `thought_why` (why this tool is the best choice right now), and `thought_how` (exactly how you will use it, including files/offsets). These parameters are REQUIRED by the tool schemas. If you omit them, the tool call will fail.'
+        ? ' **CRITICAL: HARDCORE / INSIGHT MODE IS ACTIVE.** You are in a high-transparency mode. For EVERY SINGLE tool call you make (including `grep_search`, `read_file`, `list_directory`, etc.), you MUST provide three additional mandatory parameters: `thought_what` (what you have understood so far about the problem and the current sub-task), `thought_why` (why this specific tool is the best choice right now and why you chose it), and `thought_how` (exactly how you will use it, including files/offsets). These parameters are REQUIRED by the tool schemas. If you omit them, the tool call will fail.'
         : ''
     } Break them down into smaller, manageable subtasks and use the ${formatToolName(WRITE_TODOS_TOOL_NAME)} tool to track your progress.`;
   }
@@ -576,7 +576,7 @@ function workflowStepStrategy(options: PrimaryWorkflowsOptions): string {
     options.interactive ? ' Share a concise summary of your strategy.' : ''
   }${
     options.isHardcoreMode
-      ? ' **CRITICAL: HARDCORE MODE IS ACTIVE.** You are in a high-transparency mode. For EVERY SINGLE tool call you make (including `grep_search`, `read_file`, `list_directory`, etc.), you MUST provide three additional mandatory parameters: `thought_what` (exact sub-task you are solving), `thought_why` (why this tool is the best choice right now), and `thought_how` (exactly how you will use it, including files/offsets). These parameters are REQUIRED by the tool schemas. If you omit them, the tool call will fail.'
+      ? ' **CRITICAL: HARDCORE / INSIGHT MODE IS ACTIVE.** You are in a high-transparency mode. For EVERY SINGLE tool call you make (including `grep_search`, `read_file`, `list_directory`, etc.), you MUST provide three additional mandatory parameters: `thought_what` (what you have understood so far about the problem and the current sub-task), `thought_why` (why this specific tool is the best choice right now and why you chose it), and `thought_how` (exactly how you will use it, including files/offsets). These parameters are REQUIRED by the tool schemas. If you omit them, the tool call will fail.'
       : ''
   }`;
 }

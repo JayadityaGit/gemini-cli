@@ -568,7 +568,10 @@ export class ToolRegistry {
   ): FunctionDeclaration {
     const approvalMode = this.config.getApprovalMode();
     const isPlanMode = approvalMode === ApprovalMode.PLAN;
-    const isHardcoreMode = approvalMode === ApprovalMode.HARDCORE;
+    const isHardcoreMode =
+      approvalMode === ApprovalMode.HARDCORE ||
+      (typeof this.config.getInsightMode === 'function' &&
+        this.config.getInsightMode());
     const plansDir = this.config.storage.getPlansDir();
 
     let schema = tool.getSchema(modelId);
@@ -594,11 +597,13 @@ export class ToolRegistry {
 
         parametersJsonSchema.properties['thought_what'] = {
           type: 'string',
-          description: 'What you understood about the problem or task.',
+          description:
+            'What you understood about the problem and the current sub-task.',
         };
         parametersJsonSchema.properties['thought_why'] = {
           type: 'string',
-          description: 'Why you chose this specific approach and tools.',
+          description:
+            'Why you chose this specific tool right now and why you chose it over others.',
         };
         parametersJsonSchema.properties['thought_how'] = {
           type: 'string',

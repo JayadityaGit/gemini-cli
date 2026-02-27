@@ -535,6 +535,7 @@ export interface ConfigParameters {
   disabledSkills?: string[];
   adminSkillsEnabled?: boolean;
   experimentalJitContext?: boolean;
+  insightMode?: boolean;
   toolOutputMasking?: Partial<ToolOutputMaskingConfig>;
   disableLLMCorrection?: boolean;
   plan?: boolean;
@@ -734,6 +735,7 @@ export class Config {
   private readonly adminSkillsEnabled: boolean;
 
   private readonly experimentalJitContext: boolean;
+  private readonly insightMode: boolean;
   private readonly disableLLMCorrection: boolean;
   private readonly planEnabled: boolean;
   private readonly planModeRoutingEnabled: boolean;
@@ -833,6 +835,7 @@ export class Config {
     this.adminSkillsEnabled = params.adminSkillsEnabled ?? true;
     this.modelAvailabilityService = new ModelAvailabilityService();
     this.experimentalJitContext = params.experimentalJitContext ?? false;
+    this.insightMode = params.insightMode ?? false;
     this.modelSteering = params.modelSteering ?? false;
     this.userHintService = new UserHintService(() =>
       this.isModelSteeringEnabled(),
@@ -1768,7 +1771,11 @@ export class Config {
     return this.modelSteering;
   }
 
-  getToolOutputMaskingEnabled(): boolean {
+  getInsightMode(): boolean {
+    return this.insightMode;
+  }
+
+  isToolOutputMaskingEnabled(): boolean {
     return this.toolOutputMasking.enabled;
   }
 

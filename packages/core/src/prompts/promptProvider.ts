@@ -147,7 +147,10 @@ export class PromptProvider {
           'primaryWorkflows',
           () => ({
             interactive: interactiveMode,
-            isHardcoreMode: approvalMode === ApprovalMode.HARDCORE,
+            isHardcoreMode:
+              approvalMode === ApprovalMode.HARDCORE ||
+              (typeof config.getInsightMode === 'function' &&
+                config.getInsightMode()),
             enableCodebaseInvestigator: enabledToolNames.has(
               CodebaseInvestigatorAgent.name,
             ),

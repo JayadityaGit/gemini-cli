@@ -516,6 +516,7 @@ describe('WebFetchTool', () => {
       expect(confirmationDetails).toEqual({
         type: 'info',
         title: 'Confirm Web Fetch',
+        toolName: 'web_fetch',
         prompt: 'fetch https://example.com',
         urls: ['https://example.com/'],
         onConfirm: expect.any(Function),
@@ -534,6 +535,7 @@ describe('WebFetchTool', () => {
       expect(confirmationDetails).toEqual({
         type: 'info',
         title: 'Confirm Web Fetch',
+        toolName: 'web_fetch',
         prompt: 'Fetch https://example.com',
         urls: ['https://example.com'],
         onConfirm: expect.any(Function),
@@ -554,6 +556,7 @@ describe('WebFetchTool', () => {
       expect(confirmationDetails).toEqual({
         type: 'info',
         title: 'Confirm Web Fetch',
+        toolName: 'web_fetch',
         prompt:
           'fetch https://github.com/google/gemini-react/blob/main/README.md',
         urls: [

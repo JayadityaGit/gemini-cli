@@ -1787,6 +1787,16 @@ const SETTINGS_SCHEMA = {
           'Enable web fetch behavior that bypasses LLM summarization.',
         showInDialog: true,
       },
+      insightMode: {
+        type: 'boolean',
+        label: 'Insight Mode',
+        category: 'Experimental',
+        requiresRestart: true,
+        default: false,
+        description:
+          "Silently record the AI's reasoning (what, why, how) for every tool call into a session-specific JSON log file in the `.gemini/insights` directory.",
+        showInDialog: true,
+      },
     },
   },
 

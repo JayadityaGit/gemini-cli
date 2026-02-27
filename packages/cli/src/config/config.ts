@@ -780,6 +780,7 @@ export async function loadCliConfig(
     extensionsEnabled,
     agents: settings.agents,
     adminSkillsEnabled,
+    insightMode: settings.experimental?.insightMode,
     allowedMcpServers: mcpEnabled
       ? (argv.allowedMcpServerNames ?? settings.mcp?.allowed)
       : undefined,

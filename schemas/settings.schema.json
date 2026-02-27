@@ -1580,6 +1580,13 @@
       "default": {},
       "type": "object",
       "properties": {
+        "insightMode": {
+          "title": "Insight Mode",
+          "description": "Silently record the AI's reasoning (what, why, how) for every tool call into a session-specific JSON log file in the `.gemini/insights` directory.",
+          "markdownDescription": "Silently record the AI's reasoning (what, why, how) for every tool call into a session-specific JSON log file in the `.gemini/insights` directory.\n\n- Category: `Experimental`\n- Requires restart: `yes`\n- Default: `false`",
+          "default": false,
+          "type": "boolean"
+        },
         "toolOutputMasking": {
           "title": "Tool Output Masking",
           "description": "Advanced settings for tool output masking to manage context window efficiency.",
